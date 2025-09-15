@@ -24,7 +24,8 @@ The server can be configured using the following environment variables. If they 
 
 1. Clone the repository: git clone `https://github.com/adammcgrogan/go-auth`, `cd go-auth`
 2. Generate Code:
-```protoc --proto_path=. --go_out=. --go_opt=paths=source_relative \
+```
+protoc --proto_path=. --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
     auth/auth.proto
 ```
