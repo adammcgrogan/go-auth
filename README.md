@@ -16,9 +16,9 @@ The service uses a SQLite database to store user information and follows securit
 - protoc & Go Plugins (Required for local development if you modify the .proto file)
 
 ### Running Locally
-
-1. Start the Service: `docker-compose up --build -d`
-2. Use the client
+1. Clone the repository: `git clone https://github.com/adammcgrogan/go-auth.git`, `cd go-auth`.
+2. Start the Service: `docker-compose up --build -d`
+3. Use the client
 ```
 # Register a new user
 go run ./client register testuser securepassword123
