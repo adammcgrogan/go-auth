@@ -26,7 +26,7 @@ The server can be configured using the following environment variables. If they 
 2. Generate Code:
 ```protoc --proto_path=. --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    auth/auth.proto```
+    auth/auth.proto
+```
 3. Start the Server: (In Terminal 1) `go run ./server`
 4. Use the Client: (In Terminal 2) `go run ./client register testuser password123` & `go run ./client login testuser password123` 
-
