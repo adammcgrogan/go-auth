@@ -1,0 +1,11 @@
+services:
+  auth-service:
+    build: .
+    container_name: auth-service
+    ports:
+      - "50051:50051"
+    environment:
+      - JWT_SECRET=a_very_secure_secret
+      - DB_PATH=/data/users.db
+    volumes:
+      - ./data:/data

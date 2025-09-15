@@ -5,45 +5,46 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/mattn/go-sqlite3" // Import the SQLite driver
+	_ "modernc.org/sqlite"
 )
 
-// User represents a user record in the database.
+// User represents a user in the database.
 type User struct {
 	ID           int64
 	Username     string
 	PasswordHash string
 }
 
-// Database is a struct that holds the database connection.
+// Database is a wrapper around the sql.DB connection.
 type Database struct {
 	*sql.DB
 }
 
-// NewDatabase creates and initializes a new Database connection.
+// NewDatabase initializes and returns a new database connection.
 func NewDatabase(dataSourceName string) (*Database, error) {
-	db, err := sql.Open("sqlite3", dataSourceName)
+	db, err := sql.Open("sqlite", dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %v", err)
+		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %v", err)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Create the users table if it doesn't already exist.
-	createTableSQL := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL UNIQUE,
-		password_hash TEXT NOT NULL
-	);`
+	log.Println("Connected to the database successfully.")
 
+	// Create the users table if it doesn't exist.
+	createTableSQL := `
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
+        );
+    `
 	_, err = db.Exec(createTableSQL)
 	if err != nil {
 		return nil, fmt.Errorf("could not create users table: %w", err)
 	}
 
-	log.Println("Database connection successful and table initialized.")
 	return &Database{DB: db}, nil
 }
 
@@ -51,12 +52,16 @@ func NewDatabase(dataSourceName string) (*Database, error) {
 func (db *Database) CreateUser(username, passwordHash string) (int64, error) {
 	res, err := db.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", username, passwordHash)
 	if err != nil {
-		return 0, fmt.Errorf("failed to insert user: %v", err)
+		return 0, fmt.Errorf("failed to insert user: %w", err)
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID: %w", err)
+	}
+	return id, nil
 }
 
-// GetUserByUsername retrieves a user from the database by their username.
+// GetUserByUsername retrieves a user by their username.
 func (db *Database) GetUserByUsername(username string) (*User, error) {
 	user := &User{}
 	row := db.QueryRow("SELECT id, username, password_hash FROM users WHERE username = ?", username)
@@ -67,4 +72,24 @@ func (db *Database) GetUserByUsername(username string) (*User, error) {
 		return nil, fmt.Errorf("could not scan user row: %w", err)
 	}
 	return user, nil
+}
+
+// GetAllUsernames retrieves all usernames from the database.
+func (db *Database) GetAllUsernames() ([]string, error) {
+	rows, err := db.Query("SELECT username FROM users ORDER BY username")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
+
+	var usernames []string
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			return nil, fmt.Errorf("failed to scan username: %w", err)
+		}
+		usernames = append(usernames, username)
+	}
+
+	return usernames, nil
 }

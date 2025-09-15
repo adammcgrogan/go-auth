@@ -8,6 +8,7 @@ option go_package = "./auth";
 service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
 }
 
 // The request message for registering a new user.
@@ -28,5 +29,13 @@ message LoginRequest {
 
 message LoginResponse {
   string token = 1;
+}
+
+// New request message for ListUsers (it's empty)
+message ListUsersRequest {}
+
+// New response message for ListUsers
+message ListUsersResponse {
+  repeated string usernames = 1;
 }
 
