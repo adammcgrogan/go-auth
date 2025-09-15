@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "./auth";
+
+// The authentication service definition.
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+}
+
+// The request message for registering a new user.
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+}
+
+// The request message for logging in a user.
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
